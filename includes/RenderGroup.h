@@ -19,7 +19,7 @@ protected:
 
 public:
 
-    RenderGroup() : Renderable() {};
+    RenderGroup() {};
 
     RenderGroup( std::initializer_list< std::shared_ptr<Renderable> > && );
 

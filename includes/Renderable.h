@@ -8,12 +8,15 @@
 class Renderable 
 {
 
-protected: 
+protected:
+    
     glm::mat4 _local;
 
 public:
 
     Renderable() : _local( 1.0 ) {};
+
+    glm::mat4 &transform() { return _local; }
 
     virtual void render(ShaderProgram &, glm::mat4 &) = 0;
 };
