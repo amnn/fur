@@ -24,13 +24,13 @@ class RenderEngine : public RenderGroup
 
 public:
 
-    RenderEngine(int _w, int _h) 
+    RenderEngine( float _w, float _h, float fov, 
+                 float ncp = 0.1f, float fcp = 100.f ) 
     throw( char const * ) 
-    : screen( _w, _h )
+    : screen( (int)_w, (int)_h )
     {
 
-        // TODO: local should be set to a perspective matrix
-        _local = glm::mat4( 1.0 );
+        _local = glm::perspective( fov, _w / _h, ncp, fcp );
 
         glewExperimental = true;
         if( glewInit() != GLEW_OK ) { throw( "Failed to Initialize GLEW!" ); }

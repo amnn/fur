@@ -23,7 +23,7 @@ int main( int, char ** )
 
     try {
 
-        RenderEngine<GLFWScr>             engine( 1024, 768 );
+        RenderEngine<GLFWScr>             engine( 1024.f, 768.f, 45.f );
 
         engine.use_program( ShaderProgram( "assets/shaders/vert.glsl", 
                                            "assets/shaders/frag.glsl" ) );
