@@ -9,6 +9,7 @@
 
 #include "GL_includes.h"
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "RenderGroup.h"
 #include "ShaderProgram.h"
@@ -21,16 +22,26 @@ class RenderEngine : public RenderGroup
     std::vector< std::thread >    _aux;
     Scr                         screen;
     ShaderProgram                _prog;
+    glm::mat4                    _proj,
+                                 _view;
 
 public:
 
-    RenderEngine( float _w, float _h, float fov, 
-                 float ncp = 0.1f, float fcp = 100.f ) 
+    RenderEngine
+    ( 
+      float  _w, 
+      float  _h, 
+      float fov, 
+      float ncp =  0.1f, 
+      float fcp = 100.f 
+    ) 
     throw( char const * ) 
-    : screen( (int)_w, (int)_h )
+    : screen( (int)_w, (int)_h ),
+      _proj { glm::perspective( fov, _w/_h, ncp, fcp ) },
+      _view ( 1.f )
     {
 
-        _local = glm::perspective( fov, _w / _h, ncp, fcp );
+        _local = _proj * _view;
 
         glewExperimental = true;
         if( glewInit() != GLEW_OK ) { throw( "Failed to Initialize GLEW!" ); }
@@ -55,6 +66,22 @@ public:
     {
         _prog = p;
         _prog.use();
+    }
+
+    void look_at
+    (
+      float cX, float cY, float cZ,
+      float pX, float pY, float pZ,
+      float                    dir
+    )
+    {
+
+        _view = glm::lookAt( glm::vec3( cX,   cY,  cZ ),
+                             glm::vec3( pX,   pY,  pZ ),
+                             glm::vec3( 0.f, dir, 0.f ) );
+
+        _local = _proj * _view;
+
     }
 
     void render()    { 
