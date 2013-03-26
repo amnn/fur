@@ -4,7 +4,7 @@
 #include "RenderEngine.h"
 
 class GLFWScr {
-
+    
 public:
 
     GLFWScr( int , int ) throw( char const * );

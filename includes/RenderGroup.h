@@ -25,6 +25,7 @@ public:
 
     void add_child( std::shared_ptr<Renderable> & );
 
+    void tick(                 const double & );
     void render( ShaderProgram &, glm::mat4 & );
 
 };

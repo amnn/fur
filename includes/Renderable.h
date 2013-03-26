@@ -8,17 +8,26 @@
 class Renderable 
 {
 
-protected:
-    
-    glm::mat4 _local;
-
 public:
+
+    typedef void (*tick_callback)(Renderable &,const double &);
 
     Renderable() : _local( 1.0 ) {};
 
-    glm::mat4 &transform() { return _local; }
+    glm::mat4     & transform()      { return       _local; }
 
-    virtual void render(ShaderProgram &, glm::mat4 &) = 0;
+    tick_callback & callback()       { return          _cb; }
+
+    void tick( const double &delta ) { _cb( *this, delta ); }
+
+    virtual void render( ShaderProgram &, glm::mat4 & ) = 0;
+
+
+protected:
+
+    glm::mat4     _local;
+    tick_callback    _cb;
+
 };
 
 #endif

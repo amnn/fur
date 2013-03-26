@@ -23,6 +23,7 @@ GLFWScr::GLFWScr( int width, int height ) throw( char const * )
 
     glfwSetWindowTitle(    "Fur" );
     glfwEnable( GLFW_STICKY_KEYS );
+
 }
 
 GLFWScr::~GLFWScr()
@@ -33,7 +34,26 @@ GLFWScr::~GLFWScr()
 void GLFWScr::display_link( RenderEngine<GLFWScr> *engine )
 {
 
-    do { engine->thrd_req(); engine->render(); engine->thrd_rel(); } 
+    double last  = glfwGetTime(),
+           now,
+           delta;
+    
+    do { 
+
+        engine->thrd_req(); 
+
+        engine->render(  );
+
+        now   = glfwGetTime();
+        delta =    now - last;
+        last  =           now;
+
+        engine->tick( delta );
+
+
+        engine->thrd_rel();
+
+    } 
     while( glfwGetKey( GLFW_KEY_ESC ) != GLFW_PRESS && glfwGetWindowParam( GLFW_OPENED ) );
 
 }
