@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include <fstream>
 
 #include "GL_includes.h"
@@ -102,21 +103,22 @@ ShaderProgram::ShaderProgram( const char * vs_file, const char * fs_file ) throw
 ShaderProgram &ShaderProgram::operator=( ShaderProgram &p )
 {
 
-    _id    =    p.id();
-    _matID = p.matID();
+    std::swap( _id,       p._id );
+    std::swap( _matID, p._matID );
 
     return       *this;
 }
 
 ShaderProgram &ShaderProgram::operator=( ShaderProgram &&p )
 {
-    _id    =    p.id();
-    _matID = p.matID();
 
+    std::swap( _id,       p._id );
+    std::swap( _matID, p._matID );
+    
     return       *this;
 }
 
-ShaderProgram::~ShaderProgram()           { if( _id ) glDeleteProgram( _id ); }
+ShaderProgram::~ShaderProgram()           { std::cout << "Cleaning up Program " << _id << std::endl; if( _id ) glDeleteProgram( _id ); }
 
 void ShaderProgram::use()           const {           glUseProgram(    _id ); }
 
