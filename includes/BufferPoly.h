@@ -64,7 +64,7 @@ public:
 
         glm::mat4 transform = m * _local;
 
-        glUniformMatrix4fv( p.matID(), 1, GL_FALSE, &m[0][0] );
+        glUniformMatrix4fv(            p.matID(), 1, GL_FALSE, &transform[0][0] );
         glDrawElements( GL_TRIANGLE_STRIP, indices, GL_UNSIGNED_INT, (void *) 0 );
 
     }
