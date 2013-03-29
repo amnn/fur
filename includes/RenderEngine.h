@@ -1,8 +1,8 @@
 #ifndef RENDERENGINE_H
 #define RENDERENGINE_H
 
-#include <iostream>
 #include <cstdlib>
+#include <utility>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -18,35 +18,57 @@ template< class Scr >
 class RenderEngine : public RenderGroup
 {
 
-    bool                         _term;
-    std::mutex                 _access;
-    std::vector< std::thread >    _aux;
-    Scr                        _screen;
-    ShaderProgram                _prog;
-    glm::mat4                    _proj,
-                                 _view;
+    bool                             _term;
+    std::mutex                     _access;
+    std::vector< std::thread >        _aux;
+    Scr                            _screen;
+    std::shared_ptr< ShaderProgram > _prog;
+    glm::mat4                        _proj,
+                                     _view;
+
+    RenderEngine( float _w, float _h )
+    throw( char const * )
+    : RenderGroup                   (),
+      _term                  { false },
+      _screen     ( (int)_w, (int)_h ),
+      _view                    ( 1.f )
+    {
+
+        glewExperimental = true;
+        if( glewInit() != GLEW_OK ) { throw( "Failed to Initialize GLEW!" ); }
+
+    }
 
 public:
 
     RenderEngine
     ( 
+
       float  _w, 
       float  _h, 
       float fov, 
-      float ncp =  0.1f, 
-      float fcp = 100.f 
-    ) 
-    throw( char const * ) 
-    : _term { false },
-      _screen( (int)_w, (int)_h ),
-      _proj { glm::perspective( fov, _w/_h, ncp, fcp ) },
-      _view ( 1.f )
+      float ncp, 
+      float fcp
+
+    ) : RenderEngine( _w, _h )
     {
 
+        _proj  = glm::perspective( fov, _w/_h, ncp, fcp );
         _local = _proj * _view;
 
-        glewExperimental = true;
-        if( glewInit() != GLEW_OK ) { throw( "Failed to Initialize GLEW!" ); }
+    }
+
+    RenderEngine
+    (
+      float  _w,
+      float  _h,
+      float ncp,
+      float fcp
+
+    ) : RenderEngine( _w, _h )
+    {
+        _proj  = glm::ortho( -1.f, 1.f, -1.f,1.f, ncp, fcp );
+        _local = _proj * _view; 
 
     }
 
@@ -66,10 +88,10 @@ public:
 
     void draw_loop()   {    _screen.display_link( this ); }
 
-    void use_program( ShaderProgram &&p )
+    void use_program( std::shared_ptr<ShaderProgram> &p )
     {
         _prog = p;
-        _prog.use();
+        _prog->use();
     }
 
     void look_at
@@ -92,7 +114,7 @@ public:
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-        for( auto c : children ) c->render( _prog, _local );
+        for( auto c : children ) c->render( *_prog, _local );
 
         _screen.swap(); 
     }

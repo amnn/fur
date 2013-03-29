@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 #include <fstream>
 
 #include "GL_includes.h"
@@ -100,28 +99,27 @@ ShaderProgram::ShaderProgram( const char * vs_file, const char * fs_file ) throw
 
 }
 
-ShaderProgram &ShaderProgram::operator=( ShaderProgram &p )
+ShaderProgram::ShaderProgram( ShaderProgram &&that )
 {
 
-    std::swap( _id,       p._id );
-    std::swap( _matID, p._matID );
+    std::swap( _id,       that._id );
+    std::swap( _matID, that._matID );
 
-    return       *this;
 }
 
-ShaderProgram &ShaderProgram::operator=( ShaderProgram &&p )
+ShaderProgram &ShaderProgram::operator=( ShaderProgram &&that )
 {
 
-    std::swap( _id,       p._id );
-    std::swap( _matID, p._matID );
+    std::swap( _id,       that._id );
+    std::swap( _matID, that._matID );
     
-    return       *this;
+    return                     *this;
 }
 
-ShaderProgram::~ShaderProgram()           { std::cout << "Cleaning up Program " << _id << std::endl; if( _id ) glDeleteProgram( _id ); }
+ShaderProgram::~ShaderProgram()           { glDeleteProgram( _id ); }
 
-void ShaderProgram::use()           const {           glUseProgram(    _id ); }
+void ShaderProgram::use()           const { glUseProgram(    _id ); }
 
-const GLuint ShaderProgram::id()    const {                       return _id; }
+const GLuint ShaderProgram::id()    const {             return _id; }
 
-const GLuint ShaderProgram::matID() const {                    return _matID; }
+const GLuint ShaderProgram::matID() const {          return _matID; }

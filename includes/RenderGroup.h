@@ -19,9 +19,15 @@ protected:
 
 public:
 
-    RenderGroup() {};
+    RenderGroup() : Renderable() {};
 
     RenderGroup( std::initializer_list< std::shared_ptr<Renderable> > && );
+
+    RenderGroup            ( const RenderGroup & ) = delete;
+    RenderGroup &operator= ( const RenderGroup & ) = delete;
+
+    RenderGroup            ( RenderGroup && );
+    RenderGroup &operator= ( RenderGroup && );
 
     void add_child( std::shared_ptr<Renderable> & );
 

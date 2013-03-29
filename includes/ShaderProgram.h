@@ -18,10 +18,14 @@ public:
 
     ShaderProgram() : _id { 0 }, _matID { -1 } {};
     ShaderProgram( const char *, const char * ) throw( char const * );
+
+    ShaderProgram( const ShaderProgram  & ) = delete;
+    ShaderProgram(       ShaderProgram && );
+
     ~ShaderProgram();
 
-    ShaderProgram &operator=( ShaderProgram  & );
-    ShaderProgram &operator=( ShaderProgram && );
+    ShaderProgram &operator=( const ShaderProgram  & ) = delete;
+    ShaderProgram &operator=( ShaderProgram       && );
 
     void         use()   const;
     const GLuint id()    const;

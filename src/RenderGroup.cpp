@@ -16,6 +16,16 @@ RenderGroup::RenderGroup( std::initializer_list< std::shared_ptr<Renderable> > &
 
 }
 
+RenderGroup::RenderGroup( RenderGroup &&that )
+{
+    std::swap( children, that.children );
+}
+
+RenderGroup &RenderGroup::operator=( RenderGroup &&that )
+{
+    std::swap( children, that.children );
+}
+
 void RenderGroup::add_child( std::shared_ptr<Renderable> &pChild )
 {
     children.emplace_back( pChild );
@@ -24,6 +34,7 @@ void RenderGroup::add_child( std::shared_ptr<Renderable> &pChild )
 void RenderGroup::tick( const double &delta )
 {
 
+    Renderable::tick( delta );
     for( auto c : children ) c->tick( delta );
 
 }

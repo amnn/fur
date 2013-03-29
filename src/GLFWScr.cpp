@@ -1,4 +1,3 @@
-#include <iostream>
 #include <thread>
 #include <cstdlib>
 
@@ -23,6 +22,9 @@ GLFWScr::GLFWScr( int width, int height ) throw( char const * )
 
     glfwSetWindowTitle(    "Fur" );
     glfwEnable( GLFW_STICKY_KEYS );
+    glEnable(      GL_DEPTH_TEST );
+    glDepthMask(         GL_TRUE );
+    glDepthFunc(       GL_LEQUAL );
 
 }
 
@@ -41,7 +43,6 @@ void GLFWScr::display_link( RenderEngine<GLFWScr> *engine )
     do { 
 
         engine->thrd_req(); 
-
         engine->render(  );
 
         now   = glfwGetTime();

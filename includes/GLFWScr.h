@@ -10,6 +10,12 @@ public:
     GLFWScr( int , int ) throw( char const * );
     ~GLFWScr();
 
+    GLFWScr            ( const GLFWScr  & ) = delete;
+    GLFWScr &operator= ( const GLFWScr  & ) = delete;
+
+    GLFWScr            ( GLFWScr       && )                {}
+    GLFWScr &operator= ( GLFWScr       && ) { return *this; }
+
     void display_link( RenderEngine<GLFWScr> * );
 
     void swap();

@@ -12,13 +12,18 @@ public:
 
     typedef void (*tick_callback)(Renderable &,const double &);
 
-    Renderable() : _local( 1.0 ) {};
+    Renderable() : _local( 1.0 ), _cb { 0 } {};
 
-    glm::mat4     & transform()      { return       _local; }
+    Renderable( const Renderable &that )
+    {
+        _local = that._local;
+        _cb    =    that._cb;
+    }
+    
+    glm::mat4     & transform()      { return                 _local; }
+    tick_callback & callback()       { return                    _cb; }
 
-    tick_callback & callback()       { return          _cb; }
-
-    void tick( const double &delta ) { _cb( *this, delta ); }
+    void tick( const double &delta ) { if( _cb ) _cb( *this, delta ); }
 
     virtual void render( ShaderProgram &, glm::mat4 & ) = 0;
 
