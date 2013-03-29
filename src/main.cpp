@@ -143,10 +143,10 @@ int main( int, char ** )
 
         };
 
-        t0->callback() =    rot;
-        t1->callback() =    rot;
-        t2->callback() = revRot;
-        t3->callback() = revRot;
+        t0->callback() =    &rot;
+        t1->callback() =    &rot;
+        t2->callback() = &revRot;
+        t3->callback() = &revRot;
 
         engine.draw_loop();
 
