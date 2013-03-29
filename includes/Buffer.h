@@ -1,8 +1,11 @@
+#ifndef BUFFER_H
+#define BUFFER_H
+
 #include "GL_includes.h"
 
 class Buffer {
 
-    GLuint _id;
+    GLuint _id, _target;
 
 public:
 
@@ -17,29 +20,31 @@ public:
         S       *contents, 
         GLenum      usage 
     
-    ) : Buffer()             { data( target, size, contents, usage ); }
+    ) : Buffer()     { _target = target; data( size, contents, usage ); }
 
-    Buffer( Buffer &&that )            {  std::swap( _id, that._id ); }
-    Buffer( Buffer & )                                      = delete;
+    Buffer( Buffer &&that )            {    std::swap( _id, that._id ); }
+    Buffer( Buffer & )                                        = delete;
 
-    Buffer &operator=( Buffer &&that ) {  std::swap( _id, that._id ); 
-                                                        return *this; }
-    Buffer &operator=( Buffer & )                           = delete;
+    Buffer &operator=( Buffer &&that ) {    std::swap( _id, that._id ); 
+                                                          return *this; }
+    Buffer &operator=( Buffer & )                             = delete;
 
-    void bind( GLenum target ) const   { glBindBuffer( target, _id ); }
+    void           bind()   const      {  glBindBuffer( _target, _id ); }
+    const GLenum & target() const      { return                _target; }
 
     template<class S>
     void data( 
-
-        GLenum     target, 
+ 
         GLsizei      size, 
         S       *contents, 
         GLenum      usage 
 
     ) const
     {
-        bind( target );
-        glBufferData( target, size * sizeof( S ), contents, usage );
+        bind();
+        glBufferData( _target, size * sizeof( S ), contents, usage );
     }
 
 };
+
+#endif

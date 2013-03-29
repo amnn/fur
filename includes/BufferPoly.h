@@ -42,6 +42,22 @@ public:
 
     }
 
+    BufferPoly( std::shared_ptr<Buffer> &b, GLuint *elems, int nElem )
+    {
+
+        if( b->target() != GL_ARRAY_BUFFER ) throw( "Shared Buffer must have GL_ARRAY_BUFFER target!" );
+
+        indices = nElem;
+
+        glGenVertexArrays( 1, &vaoID );
+        glBindVertexArray(     vaoID );
+
+        _aBuff = b; _aBuff->bind();
+        _eBuff = std::shared_ptr<Buffer>(new Buffer( GL_ELEMENT_ARRAY_BUFFER, nElem, elems, GL_STATIC_DRAW ) );
+
+        S::layout( *this );
+    }
+
     ~BufferPoly() { glDeleteVertexArrays( 1, &vaoID ); }
 
     BufferPoly( const BufferPoly<S> &that ) 
@@ -55,8 +71,8 @@ public:
         _eBuff  =  that._eBuff;
         indices = that.indices;
 
-        _aBuff->bind(         GL_ARRAY_BUFFER );
-        _eBuff->bind( GL_ELEMENT_ARRAY_BUFFER );
+        _aBuff->bind();
+        _eBuff->bind();
 
         S::layout( *this );
 
@@ -72,8 +88,8 @@ public:
         _eBuff  =  that._eBuff;
         indices = that.indices; 
 
-        _aBuff->bind(         GL_ARRAY_BUFFER );
-        _eBuff->bind( GL_ELEMENT_ARRAY_BUFFER );
+        _aBuff->bind();
+        _eBuff->bind();
 
         S::layout( *this );
 
@@ -115,8 +131,8 @@ public:
     ) const
     {
 
-        glBindVertexArray(      vaoID );
-        _aBuff->bind( GL_ARRAY_BUFFER );
+        glBindVertexArray( vaoID );
+        _aBuff->bind(            );
 
         glEnableVertexAttribArray( (GLuint)attr );
         glVertexAttribPointer( (GLuint)attr, size, type, norm, stride, reinterpret_cast<void *>( off ) );
