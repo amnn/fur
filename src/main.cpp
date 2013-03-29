@@ -17,15 +17,6 @@ using namespace std;
 /* TODO
 
 * Tween class
-* Const Correctness
-    - Buffer
-    - BufferPoly
-    - DebugRenderable
-    - GLFWScr
-    - Renderable
-    - RenderEngine
-    - RenderGroup
-    - ShaderProgram
 * New BufferPoly constructor initialises VAO with already created Buffer.
 * New BufferPoly constructor initialise from OBJ file.
 

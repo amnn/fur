@@ -26,7 +26,7 @@ public:
                                                         return *this; }
     Buffer &operator=( Buffer & )                           = delete;
 
-    void bind( GLenum target )         { glBindBuffer( target, _id ); }
+    void bind( GLenum target ) const   { glBindBuffer( target, _id ); }
 
     template<class S>
     void data( 
@@ -36,7 +36,7 @@ public:
         S       *contents, 
         GLenum      usage 
 
-    )
+    ) const
     {
         bind( target );
         glBufferData( target, size * sizeof( S ), contents, usage );

@@ -25,7 +25,7 @@ public:
 
     virtual void tick( const double &delta ) { if( _cb ) _cb( *this, delta ); }
 
-    virtual void render( ShaderProgram &, glm::mat4 & ) = 0;
+    virtual void render( const ShaderProgram &, const glm::mat4 & ) const = 0;
 
 
 protected:

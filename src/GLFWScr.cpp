@@ -33,7 +33,7 @@ GLFWScr::~GLFWScr()
     glfwTerminate();
 }
 
-void GLFWScr::display_link( RenderEngine<GLFWScr> *engine )
+void GLFWScr::display_link( RenderEngine<GLFWScr> *engine ) const
 {
 
     double last  = glfwGetTime(),
@@ -59,4 +59,4 @@ void GLFWScr::display_link( RenderEngine<GLFWScr> *engine )
 
 }
 
-void GLFWScr::swap() { glfwSwapBuffers(); }
+void GLFWScr::swap() const { glfwSwapBuffers(); }

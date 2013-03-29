@@ -112,7 +112,7 @@ public:
         GLsizei                     stride, 
         GLuint                         off 
 
-    )
+    ) const
     {
 
         glBindVertexArray(      vaoID );
@@ -123,7 +123,7 @@ public:
 
     }
 
-    void render( ShaderProgram &p, glm::mat4 &m )
+    void render( const ShaderProgram &p, const glm::mat4 &m ) const
     {
 
         glBindVertexArray( vaoID );

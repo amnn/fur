@@ -31,8 +31,8 @@ public:
 
     void add_child( std::shared_ptr<Renderable> & );
 
-    void tick(                 const double & );
-    void render( ShaderProgram &, glm::mat4 & );
+    void tick  (                           const double & );
+    void render( const ShaderProgram &, const glm::mat4 & ) const;
 
 };
 

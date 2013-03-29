@@ -39,7 +39,7 @@ void RenderGroup::tick( const double &delta )
 
 }
 
-void RenderGroup::render( ShaderProgram &p, glm::mat4 &m )
+void RenderGroup::render( const ShaderProgram &p, const glm::mat4 &m ) const
 {
     glm::mat4 transform = m * _local;
     for( auto c : children ) c->render( p, transform );
