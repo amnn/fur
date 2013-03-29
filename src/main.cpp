@@ -58,14 +58,14 @@ int main( int, char ** )
 
     try {
 
-        RenderEngine<GLFWScr>     engine                ( 1024.f, 768.f, 0.1f, 100.f );
+        RenderEngine<GLFWScr>     engine                ( 1024.f, 768.f, 45.f, 0.1f, 100.f );
         shared_ptr<ShaderProgram> prog   ( new ShaderProgram( "assets/shaders/vert.glsl", 
                                                               "assets/shaders/frag.glsl" ) );
 
         engine.use_program( prog );
 
         engine.look_at(
-            0.f, 0.f, 10.f,
+            4.f, 4.f, 3.f,
             0.f, 0.f, 0.f,
                       1.f
         );
@@ -123,6 +123,30 @@ int main( int, char ** )
         t1->transform() = glm::translate( t1->transform(), glm::vec3( 0.f, 0.f, 0.5f ) );
         t2->transform() = glm::translate( t2->transform(), glm::vec3( 0.f, 0.f, 2.f ) );
         t3->transform() = glm::translate( t3->transform(), glm::vec3( 0.f, 0.f, 0.2f ) );
+
+        auto rot = [](Renderable &r, const double &d )
+        {
+
+            glm::mat4 &mat = r.transform();
+
+            mat = glm::rotate( mat, static_cast<float>(10*d), glm::vec3(0.f, 0.f, 1.f ) );
+
+        };
+
+
+        auto revRot = [](Renderable &r, const double &d )
+        {
+
+            glm::mat4 &mat = r.transform();
+
+            mat = glm::rotate( mat, static_cast<float>(-10*d), glm::vec3(0.f, 0.f, 1.f ) );
+
+        };
+
+        t0->callback() =    rot;
+        t1->callback() =    rot;
+        t2->callback() = revRot;
+        t3->callback() = revRot;
 
         engine.draw_loop();
 

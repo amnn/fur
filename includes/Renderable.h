@@ -20,10 +20,10 @@ public:
         _cb    =    that._cb;
     }
     
-    glm::mat4     & transform()      { return                 _local; }
-    tick_callback & callback()       { return                    _cb; }
+    glm::mat4     & transform()              { return                 _local; }
+    tick_callback & callback()               { return                    _cb; }
 
-    void tick( const double &delta ) { if( _cb ) _cb( *this, delta ); }
+    virtual void tick( const double &delta ) { if( _cb ) _cb( *this, delta ); }
 
     virtual void render( ShaderProgram &, glm::mat4 & ) = 0;
 
