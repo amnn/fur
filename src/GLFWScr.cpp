@@ -20,11 +20,12 @@ GLFWScr::GLFWScr( int width, int height ) throw( char const * )
         glfwTerminate(); throw( "Failed to Open GLFW Window!" );
     }
 
-    glfwSetWindowTitle(    "Fur" );
-    glfwEnable( GLFW_STICKY_KEYS );
-    glEnable(      GL_DEPTH_TEST );
-    glDepthMask(         GL_TRUE );
-    glDepthFunc(       GL_LEQUAL );
+    glfwSetWindowTitle(      "Fur" );
+    glfwEnable(   GLFW_STICKY_KEYS );
+    glfwDisable( GLFW_MOUSE_CURSOR );
+    glEnable(        GL_DEPTH_TEST );
+    glDepthMask(           GL_TRUE );
+    glDepthFunc(         GL_LEQUAL );
 
 }
 
