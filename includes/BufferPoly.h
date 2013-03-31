@@ -9,9 +9,13 @@
 #include "Renderable.h"
 #include "Buffer.h"
 
+template<class S> class PolyInstance;
+
 template <class S>
 class BufferPoly : public Renderable 
 {
+
+    friend class PolyInstance<S>;
 
     GLuint                      vaoID;
     GLsizei                   indices;
@@ -149,6 +153,36 @@ public:
         glDrawElements( GL_TRIANGLE_STRIP, indices, GL_UNSIGNED_INT, (void *) 0 );
 
     }
+};
+
+template <class S>
+class PolyInstance : public Renderable {
+
+    std::shared_ptr<BufferPoly<S> > _poly;
+
+public:
+
+    PolyInstance( std::shared_ptr<BufferPoly<S> > poly )
+    : Renderable(),       _poly {       poly } {};
+
+    PolyInstance( const PolyInstance &that )
+    : Renderable( that ), _poly { that._poly } {};
+
+    PolyInstance( PolyInstance &&that )
+    : Renderable( that )
+    {
+        std::swap( _poly, that._poly );
+    }
+
+    void render( const ShaderProgram &p, const glm::mat4 &m ) const
+    {
+        _poly->bind();
+        glm::mat4 transform = m * _local;
+
+        glUniformMatrix4fv(                              p.matID(), 1, GL_FALSE, &transform[0][0] );
+        glDrawElements( _poly->_fmt, _poly->_indices, _poly->_indexFormat, (void *)_poly->_offset );
+    }
+
 };
 
 #endif
