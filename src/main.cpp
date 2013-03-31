@@ -94,13 +94,13 @@ int main( int, char ** )
         engine.add_child( spc0 );
 
         spc0->transform() = glm::scale( glm::mat4(1.f), glm::vec3( 0.5f ) );
-        /*spc0->callback()  = [](Renderable &r, const double &d) {
+        spc0->callback()  = [](Renderable &r, const double &d) {
 
             glm::mat4 &mat = r.transform();
 
             mat = glm::rotate( mat, static_cast<float>(30*d), glm::vec3(1.f, 1.f, 0.f) );
 
-        };*/
+        };
 
         engine.callback() = [](Renderable &r, const double &d) {
 
