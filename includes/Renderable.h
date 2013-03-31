@@ -19,6 +19,28 @@ public:
         _local = that._local;
         _cb    =    that._cb;
     }
+
+    Renderable( Renderable &&that )
+    {
+        std::swap( _local, that._local );
+        std::swap( _cb,       that._cb );
+    }
+
+    Renderable &operator=( const Renderable &that )
+    {
+        _local = that._local;
+        _cb    =    that._cb;
+
+        return *this;
+    }
+
+    Renderable &operator=( Renderable &&that )
+    {
+        std::swap( _local, that._local );
+        std::swap( _cb,       that._cb );
+
+        return *this;
+    }
     
     glm::mat4     & transform()              { return                 _local; }
     tick_callback & callback()               { return                    _cb; }
