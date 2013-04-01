@@ -39,18 +39,18 @@ using namespace std;
 
 struct vert_attrib {
 
-    static void layout( BufferPoly<vert_attrib> &b )
+    static void layout( Buffer<vert_attrib> &b )
     {
 
-        b.register_attrib( BufferPoly<vert_attrib>::ATTRIB_VERT, 3, 
-                                                GL_FLOAT, GL_FALSE, 
-                                             sizeof( vert_attrib ), 
-                                                                 0 );
+        b.register_attrib( Buffer<vert_attrib>::ATTRIB_VERT, 3, 
+                                            GL_FLOAT, GL_FALSE, 
+                                         sizeof( vert_attrib ), 
+                                                             0 );
 
-        b.register_attrib( BufferPoly<vert_attrib>::ATTRIB_COLOR, 3,
-                                                 GL_FLOAT, GL_FALSE, 
-                                              sizeof( vert_attrib ), 
-                                              3 * sizeof( GLfloat ) );
+        b.register_attrib( Buffer<vert_attrib>::ATTRIB_COLOR, 3,
+                                             GL_FLOAT, GL_FALSE, 
+                                          sizeof( vert_attrib ), 
+                                          3 * sizeof( GLfloat ) );
 
     }
 
@@ -85,16 +85,22 @@ int main( int, char ** )
 
         auto elems = new GLuint[14] {0,1,2,3,4,1,5,6,4,7,2,6,0,1};
 
-        auto c0    = new BufferPoly<vert_attrib>( cube, 8, elems, 14 );
-        
-        shared_ptr<Renderable> spc0( c0 );
-        
+        auto v     = new Buffer<vert_attrib> ( GL_ARRAY_BUFFER,          8,  cube, GL_STATIC_DRAW );
+        auto e     = new Buffer<GLuint>      ( GL_ELEMENT_ARRAY_BUFFER, 14, elems, GL_STATIC_DRAW );
+
+        shared_ptr< Buffer< vert_attrib > > sp_v( v );
+        shared_ptr< Buffer<      GLuint > > sp_e( e );
+
+        auto c0    = shared_ptr<BufferPoly>(new BufferPoly( sp_v, sp_e, 14 ) );
+
+        shared_ptr<Renderable> sp_ic0( new BufferPoly::Instance( c0 ) );
+
         delete[] cube; delete[] elems;
 
-        engine.add_child( spc0 );
+        engine.add_child( sp_ic0 );
 
-        spc0->transform() = glm::scale( glm::mat4(1.f), glm::vec3( 0.5f ) );
-        spc0->callback()  = [](Renderable &r, const double &d) {
+        sp_ic0->transform() = glm::scale( glm::mat4(1.f), glm::vec3( 0.5f ) );
+        sp_ic0->callback()  = [](Renderable &r, const double &d) {
 
             glm::mat4 &mat = r.transform();
 

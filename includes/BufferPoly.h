@@ -2,186 +2,111 @@
 #define BUFFERPOLY_H
 
 #include <memory>
+#include <vector>
 
 #include "GL_includes.h"
 #include "glm/glm.hpp"
 
-#include "Renderable.h"
 #include "Buffer.h"
+#include "Renderable.h"
+#include "ShaderProgram.h"
 
-template<class S> class PolyInstance;
-
-template <class S>
-class BufferPoly : public Renderable 
+class BufferPoly 
 {
 
-    friend class PolyInstance<S>;
+    GLuint                                   _vaoID;
+    GLenum                                     _fmt;
+    std::vector< std::shared_ptr<void> > _tiedBuffs;
 
-    GLuint                      vaoID;
-    GLsizei                   indices;
-    std::shared_ptr< Buffer >  _aBuff,
-                               _eBuff;
+    GLsizei                                _indices;
+    std::shared_ptr<void>                   _elBuff;
+    GLenum                                   _elFmt;
+    GLuint                                   _elOff;
 
 public:
 
-    enum IncludedAttribs {
-        ATTRIB_VERT  = 0,
-        ATTRIB_COLOR = 1,
-        ATTRIB_NORM  = 2
+    class Instance : public Renderable {
+
+        std::shared_ptr<BufferPoly> _poly;
+
+    public:
+
+        Instance( std::shared_ptr<BufferPoly>  &poly ) : Renderable(), _poly { poly } {};
+        Instance( const Instance               &that ) : Renderable( that ), _poly { that._poly } {};
+        Instance( Instance                    &&that ) : Renderable( that ) { std::swap( _poly, that._poly ); };
+
+        void render( const ShaderProgram &p, const glm::mat4 &m ) const
+        {
+            _poly->bind(); glm::mat4 trn = m * _local;
+
+            glUniformMatrix4fv( p.matID(), 1, GL_FALSE, &trn[0][0] );
+            glDrawElements( _poly->_fmt, _poly->_indices, _poly->_elFmt, reinterpret_cast<void *>( _poly->_elOff ) );
+        };
+
     };
 
-    BufferPoly( S *attribs, int nAttr, GLuint *elems, int nElem ) 
-    : Renderable()
+    template <class S, class T>
+    BufferPoly
+    (
+
+        std::shared_ptr< Buffer<S> > &v, 
+        std::shared_ptr< Buffer<T> > &e,
+        GLsizei                     num,
+        GLenum                      fmt = GL_TRIANGLE_STRIP, 
+        GLenum                    elFmt =   GL_UNSIGNED_INT,    
+        GLuint                      off =                 0
+
+    )
     {
 
-        indices = nElem;
+        if( v->target() !=         GL_ARRAY_BUFFER ) throw(          "First Buffer must be Array Buffer!" );
+        if( e->target() != GL_ELEMENT_ARRAY_BUFFER ) throw( "Second Buffer must be Element Array Buffer!" );
 
-        glGenVertexArrays( 1, &vaoID );
-        glBindVertexArray(     vaoID );
+        glGenVertexArrays( 1, &_vaoID );
 
-        _aBuff = std::shared_ptr<Buffer>(new Buffer( GL_ARRAY_BUFFER,         nAttr, attribs, GL_STATIC_DRAW ) );
-        _eBuff = std::shared_ptr<Buffer>(new Buffer( GL_ELEMENT_ARRAY_BUFFER, nElem,   elems, GL_STATIC_DRAW ) );
+        add_array(                         v );
+        add_indices( fmt, num, elFmt, off, e );
 
-        S::layout( *this );
+    };
 
-    }
+    ~BufferPoly() { glDeleteVertexArrays( 1, &_vaoID ); };
 
-    BufferPoly( std::shared_ptr<Buffer> &b, GLuint *elems, int nElem )
+    BufferPoly            ( const BufferPoly &that ) = delete;
+    BufferPoly &operator= ( const BufferPoly &that ) = delete;
+
+    void bind() const { glBindVertexArray( _vaoID ); };
+
+    template <class S>
+    void add_array( std::shared_ptr< Buffer<S> > &v )
     {
+        _tiedBuffs.emplace_back(   v );
+        bind(); S::layout(        *v );
+    };
 
-        if( b->target() != GL_ARRAY_BUFFER ) throw( "Shared Buffer must have GL_ARRAY_BUFFER target!" );
-
-        indices = nElem;
-
-        glGenVertexArrays( 1, &vaoID );
-        glBindVertexArray(     vaoID );
-
-        _aBuff = b; _aBuff->bind();
-        _eBuff = std::shared_ptr<Buffer>(new Buffer( GL_ELEMENT_ARRAY_BUFFER, nElem, elems, GL_STATIC_DRAW ) );
-
-        S::layout( *this );
-    }
-
-    ~BufferPoly() { glDeleteVertexArrays( 1, &vaoID ); }
-
-    BufferPoly( const BufferPoly<S> &that ) 
-    : Renderable( that )
+    template <class T>
+    void add_indices
+    ( 
+    
+        GLenum                         fmt,
+        GLsizei                        num,
+        GLenum                       elFmt,
+        GLuint                         off,
+        std::shared_ptr< Buffer<T> >    &e 
+    
+    )
     {
+        bind();
 
-        glGenVertexArrays( 1, &vaoID );
-        glBindVertexArray(     vaoID );
+        _fmt     =   fmt;
+        _indices =   num;
+        _elFmt   = elFmt;
+        _elOff   =   off;
+        _elBuff  =     e;
 
-        _aBuff  =  that._aBuff;
-        _eBuff  =  that._eBuff;
-        indices = that.indices;
+        e->bind();
+    };
 
-        _aBuff->bind();
-        _eBuff->bind();
-
-        S::layout( *this );
-
-    }
-
-    BufferPoly<S> &operator= ( const BufferPoly<S> &that )
-    {
-
-        glGenVertexArrays( 1, &vaoID );
-        glBindVertexArray(     vaoID );
-
-        _aBuff  =  that._aBuff;
-        _eBuff  =  that._eBuff;
-        indices = that.indices; 
-
-        _aBuff->bind();
-        _eBuff->bind();
-
-        S::layout( *this );
-
-    }
-
-    BufferPoly( BufferPoly &&that )
-    {
-
-        vaoID      =   that.vaoID;
-        indices    = that.indices;
-        _aBuff     =  that._aBuff;
-        _eBuff     =  that._eBuff;
-
-        that.vaoID =            0;
-
-    }
-
-    BufferPoly<S> &operator= ( BufferPoly &&that )
-    {
-
-        std::swap( vaoID,   that.vaoID );
-        std::swap( _aBuff, that._aBuff );
-        std::swap( _eBuff, that._eBuff );
-
-        indices = that.indices;
-
-        return *this;
-    }
-
-    void register_attrib( 
-
-        BufferPoly::IncludedAttribs   attr, 
-        GLuint                        size, 
-        GLenum                        type, 
-        GLboolean                     norm, 
-        GLsizei                     stride, 
-        GLuint                         off 
-
-    ) const
-    {
-
-        glBindVertexArray( vaoID );
-        _aBuff->bind(            );
-
-        glEnableVertexAttribArray( (GLuint)attr );
-        glVertexAttribPointer( (GLuint)attr, size, type, norm, stride, reinterpret_cast<void *>( off ) );
-
-    }
-
-    void render( const ShaderProgram &p, const glm::mat4 &m ) const
-    {
-
-        glBindVertexArray( vaoID );
-        glm::mat4 transform = m * _local;
-
-        glUniformMatrix4fv(            p.matID(), 1, GL_FALSE, &transform[0][0] );
-        glDrawElements( GL_TRIANGLE_STRIP, indices, GL_UNSIGNED_INT, (void *) 0 );
-
-    }
-};
-
-template <class S>
-class PolyInstance : public Renderable {
-
-    std::shared_ptr<BufferPoly<S> > _poly;
-
-public:
-
-    PolyInstance( std::shared_ptr<BufferPoly<S> > poly )
-    : Renderable(),       _poly {       poly } {};
-
-    PolyInstance( const PolyInstance &that )
-    : Renderable( that ), _poly { that._poly } {};
-
-    PolyInstance( PolyInstance &&that )
-    : Renderable( that )
-    {
-        std::swap( _poly, that._poly );
-    }
-
-    void render( const ShaderProgram &p, const glm::mat4 &m ) const
-    {
-        _poly->bind();
-        glm::mat4 transform = m * _local;
-
-        glUniformMatrix4fv(                              p.matID(), 1, GL_FALSE, &transform[0][0] );
-        glDrawElements( _poly->_fmt, _poly->_indices, _poly->_indexFormat, (void *)_poly->_offset );
-    }
+    friend class Instance;
 
 };
 
