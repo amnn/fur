@@ -3,18 +3,19 @@
 
 #include "GL_includes.h"
 
+enum BufferAttrib {
+    ATTRIB_VERT  = 0,
+    ATTRIB_COLOR = 1,
+    ATTRIB_NORM  = 2,
+    ATTRIB_TEXUV = 3
+};
+
 template <class S>
 class Buffer {
 
     GLuint _id, _target;
 
 public:
-
-    enum Attribs {
-        ATTRIB_VERT  = 0,
-        ATTRIB_COLOR = 1,
-        ATTRIB_NORM  = 2
-    };
 
     Buffer()                           {     glGenBuffers( 1, &_id ); }
     ~Buffer()                          {  glDeleteBuffers( 1, &_id ); }
@@ -40,12 +41,12 @@ public:
 
     void register_attrib
     (
-        Attribs      attr,
-        GLuint       size,
-        GLenum       type,
-        GLboolean    norm,
-        GLsizei    stride,
-        GLuint        off
+        BufferAttrib   attr,
+        GLuint         size,
+        GLenum         type,
+        GLboolean      norm,
+        GLsizei      stride,
+        GLuint          off
 
     ) const
     {

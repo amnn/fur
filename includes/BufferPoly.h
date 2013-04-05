@@ -54,7 +54,7 @@ public:
                 _poly->_indices, 
                 _poly->_elFmt, 
                 reinterpret_cast<void *>( _poly->_elOff ) 
-                
+
             );
         };
 
