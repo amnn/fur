@@ -59,6 +59,8 @@ struct vert_attrib {
 
 };
 
+void engine_callback( Renderable &, const double & );
+
 int main( int, char ** )
 {
 
@@ -108,70 +110,7 @@ int main( int, char ** )
 
         };
 
-        engine.callback() = [](Renderable &r, const double &d) {
-
-            static int   lastMW  =        glfwGetMouseWheel();
-            static float fov     =                        FOV;
-            static glm::vec3 eye           ( 0.f, 0.f, 10.f ), 
-                             center        (            0.f ), 
-                             up            ( 0.f, 1.f,  0.f ),
-                             xAxis         ( 1.f, 0.f,  0.f );
-
-            // Zoom on mouse wheel.
-            int mw               =        glfwGetMouseWheel();
-            fov                 +=                lastMW - mw;
-            int x, y;               glfwGetMousePos( &x, &y );
-            int dx               =                x - SCR_C_X,
-                dy               =                y - SCR_C_Y;
-
-            if      ( fov < FOV_MIN ) fov = FOV_MIN;
-            else if ( fov > FOV_MAX ) fov = FOV_MAX;
-
-            if ( glfwGetMouseButton( GLFW_MOUSE_BUTTON_LEFT ) == GLFW_PRESS )
-            {
-                // pan
-                glm::mat4 trans = glm::translate( glm::mat4(1.f), glm::vec3(
-
-                    -dx * TRN_SPD,
-                     dy * TRN_SPD,
-                              0.f
-
-                ) );
-
-                eye    = glm::vec3( trans * glm::vec4( eye,    1.f ) );
-                center = glm::vec3( trans * glm::vec4( center, 1.f ) );
-
-
-            } else {
-                // rotate
-
-                glm::mat4 xRot = glm::rotate( glm::mat4(1.f), ROT_SPD*dy, xAxis );
-                up             = glm::vec3(      xRot * glm::vec4(    up, 0.f ) );
-                glm::mat4 yRot = glm::rotate( glm::mat4(1.f), ROT_SPD*dx,    up );
-                xAxis          = glm::vec3(      yRot * glm::vec4( xAxis, 0.f ) );
-
-                eye            = center + glm::vec3( yRot * xRot * glm::vec4( eye - center, 0.f ) );
-
-            }
-
-            // Reset on middle mouse button click.
-            if( glfwGetMouseButton( GLFW_MOUSE_BUTTON_MIDDLE ) == GLFW_PRESS )
-            {
-                fov    =                         FOV;
-                eye    = glm::vec3( 0.f, 0.f, 10.f );
-                center = glm::vec3(            0.f );
-                up     = glm::vec3( 0.f, 1.f,  0.f );
-                xAxis  = glm::vec3( 1.f, 0.f,  0.f );
-            }
-
-            glm::mat4 proj = glm::perspective( fov, SCR_W/SCR_H, NCP, FCP ),
-                      view = glm::lookAt( eye, center, up );
-
-            r.transform()  = proj * view;
-
-            lastMW = mw; glfwSetMousePos( SCR_C_X, SCR_C_Y );
-
-        };
+        engine.callback() = &engine_callback;
 
         engine.draw_loop();
 
@@ -181,4 +120,70 @@ int main( int, char ** )
     }
 
     return 0;
+}
+
+void engine_callback( Renderable &r, const double &d )
+{
+
+    static int   lastMW  =        glfwGetMouseWheel();
+    static float fov     =                        FOV;
+    static glm::vec3 eye           ( 0.f, 0.f, 10.f ), 
+                     center        (            0.f ), 
+                     up            ( 0.f, 1.f,  0.f ),
+                     xAxis         ( 1.f, 0.f,  0.f );
+
+    // Zoom on mouse wheel.
+    int mw               =        glfwGetMouseWheel();
+    fov                 +=                lastMW - mw;
+    int x, y;               glfwGetMousePos( &x, &y );
+    int dx               =                x - SCR_C_X,
+        dy               =                y - SCR_C_Y;
+
+    if      ( fov < FOV_MIN ) fov = FOV_MIN;
+    else if ( fov > FOV_MAX ) fov = FOV_MAX;
+
+    if ( glfwGetMouseButton( GLFW_MOUSE_BUTTON_LEFT ) == GLFW_PRESS )
+    {
+        // pan
+        glm::mat4 trans = glm::translate( glm::mat4(1.f), glm::vec3(
+
+            -dx * TRN_SPD,
+             dy * TRN_SPD,
+                      0.f
+
+        ) );
+
+        eye    = glm::vec3( trans * glm::vec4( eye,    1.f ) );
+        center = glm::vec3( trans * glm::vec4( center, 1.f ) );
+
+
+    } else {
+        // rotate
+
+        glm::mat4 xRot = glm::rotate( glm::mat4(1.f), ROT_SPD*dy, xAxis );
+        up             = glm::vec3(      xRot * glm::vec4(    up, 0.f ) );
+        glm::mat4 yRot = glm::rotate( glm::mat4(1.f), ROT_SPD*dx,    up );
+        xAxis          = glm::vec3(      yRot * glm::vec4( xAxis, 0.f ) );
+
+        eye            = center + glm::vec3( yRot * xRot * glm::vec4( eye - center, 0.f ) );
+
+    }
+
+    // Reset on middle mouse button click.
+    if( glfwGetMouseButton( GLFW_MOUSE_BUTTON_MIDDLE ) == GLFW_PRESS )
+    {
+        fov    =                         FOV;
+        eye    = glm::vec3( 0.f, 0.f, 10.f );
+        center = glm::vec3(            0.f );
+        up     = glm::vec3( 0.f, 1.f,  0.f );
+        xAxis  = glm::vec3( 1.f, 0.f,  0.f );
+    }
+
+    glm::mat4 proj = glm::perspective( fov, SCR_W/SCR_H, NCP, FCP ),
+              view = glm::lookAt( eye, center, up );
+
+    r.transform()  = proj * view;
+
+    lastMW = mw; glfwSetMousePos( SCR_C_X, SCR_C_Y );
+
 }

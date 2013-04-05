@@ -31,16 +31,31 @@ public:
 
     public:
 
-        Instance( std::shared_ptr<BufferPoly>  &poly ) : Renderable(), _poly { poly } {};
-        Instance( const Instance               &that ) : Renderable( that ), _poly { that._poly } {};
-        Instance( Instance                    &&that ) : Renderable( that ) { std::swap( _poly, that._poly ); };
+        Instance( std::shared_ptr<BufferPoly>  &poly ) 
+        : Renderable(),       _poly       { poly } {};
+
+        Instance( const Instance               &that ) 
+        : Renderable( that ), _poly { that._poly } {};
+
+        Instance( Instance                    &&that ) 
+        : Renderable( that ) 
+        { 
+            std::swap( _poly, that._poly ); 
+        };
 
         void render( const ShaderProgram &p, const glm::mat4 &m ) const
         {
             _poly->bind(); glm::mat4 trn = m * _local;
 
             glUniformMatrix4fv( p.matID(), 1, GL_FALSE, &trn[0][0] );
-            glDrawElements( _poly->_fmt, _poly->_indices, _poly->_elFmt, reinterpret_cast<void *>( _poly->_elOff ) );
+            glDrawElements(
+
+                _poly->_fmt, 
+                _poly->_indices, 
+                _poly->_elFmt, 
+                reinterpret_cast<void *>( _poly->_elOff ) 
+                
+            );
         };
 
     };

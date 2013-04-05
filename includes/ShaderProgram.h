@@ -11,7 +11,7 @@ class ShaderProgram
 
 protected:
 
-    static void read( const char *, std::string & );
+    static void read( const char *, std::string & )    throw( const char * );
     static void compile_shader( GLuint, const char * ) throw( const char * );
 
 public:

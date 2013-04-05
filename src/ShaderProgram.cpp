@@ -5,7 +5,7 @@
 
 #include "ShaderProgram.h"
 
-void ShaderProgram::read( const char *loc, std::string &buff )
+void ShaderProgram::read( const char *loc, std::string &buff ) throw( const char * )
 {
     std::ifstream in( loc, std::ios::in );
 
