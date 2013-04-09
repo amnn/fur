@@ -37,6 +37,9 @@ class RenderEngine : public RenderGroup
         glewExperimental = true;
         if( glewInit() != GLEW_OK ) { throw( "Failed to Initialize GLEW!" ); }
 
+        glEnable( GL_PRIMITIVE_RESTART );
+        glPrimitiveRestartIndex( 65535 );
+
     }
 
 public:

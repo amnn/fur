@@ -37,20 +37,19 @@ using namespace std;
 
 */
 
-template< BufferAttrib Attr >
-struct vec3 {
+struct xyzuv
+{
 
-    static void layout( Buffer<vec3> &b )
+    static void layout( Buffer<xyzuv> &b )
     {
 
-        b.register_attrib(            Attr, 3, 
-                           GL_FLOAT, GL_FALSE, 
-                               sizeof( vec3 ), 
-                                            0 );
+        b.register_attrib( ATTRIB_VERT,  3, GL_FLOAT, GL_FALSE, sizeof( float )*5,                 0 );
+        b.register_attrib( ATTRIB_TEXUV, 2, GL_FLOAT, GL_FALSE, sizeof( float )*5, sizeof( float )*3 );
 
     }
 
-    GLfloat  vert[3];
+    float vert[ 3 ];
+    float uv[   2 ];
 
 };
 
@@ -62,97 +61,75 @@ int main( int, char ** )
     try {
 
         RenderEngine<GLFWScr>     engine                     ( SCR_W, SCR_H, FOV, NCP, FCP );
-        shared_ptr<ShaderProgram> prog   ( new ShaderProgram( "assets/shaders/vert.glsl", 
-                                                              "assets/shaders/frag.glsl" ) );
+        shared_ptr<ShaderProgram> prog   ( new ShaderProgram( "assets/shaders/tex_vert.glsl", 
+                                                              "assets/shaders/tex_frag.glsl" ) );
 
         engine.use_program( prog );
 
-        auto cube = new vec3< ATTRIB_VERT >[8] {
+        auto cube = new xyzuv[14]
+        {
+            { {  1.f,  1.f,  1.f }, { 0.625f, 0.25f } }, //0
+            { { -1.f,  1.f,  1.f }, { 0.375f, 0.25f } }, //2
+            { { -1.f,  1.f, -1.f }, { 0.375f,  0.5f } }, //7
+            { {  1.f,  1.f, -1.f }, { 0.625f,  0.5f } }, //6
+            { {  1.f, -1.f,  1.f }, { 0.625f,   0.f } }, //1
+            { {  1.f, -1.f,  1.f }, { 0.875f, 0.25f } }, //1
+            { {  1.f, -1.f,  1.f }, { 0.625f,   1.f } }, //1
+            { { -1.f, -1.f,  1.f }, { 0.375f,   0.f } }, //3
+            { { -1.f, -1.f,  1.f }, { 0.125f, 0.25f } }, //3
+            { { -1.f, -1.f,  1.f }, { 0.375f,   1.f } }, //3
+            { { -1.f, -1.f, -1.f }, { 0.125f,  0.5f } }, //4
+            { { -1.f, -1.f, -1.f }, { 0.375f, 0.75f } }, //4
+            { {  1.f, -1.f, -1.f }, { 0.625f, 0.75f } }, //5
+            { {  1.f, -1.f, -1.f }, { 0.875f,  0.5f } }  //5
 
-            { {  1.f,  1.f,  1.f } },
-            { {  1.f, -1.f,  1.f } },
-            { { -1.f,  1.f,  1.f } },
-            { { -1.f, -1.f,  1.f } },
-            { { -1.f, -1.f, -1.f } },
-            { {  1.f, -1.f, -1.f } },
-            { {  1.f,  1.f, -1.f } },
-            { { -1.f,  1.f, -1.f } },
-
-        };
-
-        auto col1 = new vec3< ATTRIB_COLOR >[8] {
-
-            { { 1.f, 1.f, 1.f } },
-            { { 1.f, 1.f, 0.f } },
-            { { 1.f, 0.f, 1.f } },
-            { { 1.f, 0.f, 0.f } },
-            { { 0.f, 1.f, 1.f } },
-            { { 0.f, 1.f, 0.f } },
-            { { 0.f, 0.f, 1.f } },
-            { { 0.f, 0.f, 0.f } }
 
         };
 
-        auto col2 = new vec3< ATTRIB_COLOR >[8] {
+        auto elems = new GLuint[20] { 4, 7, 0, 1, 3, 2, 12, 11, 6, 9, 
+                                      65535, 5, 13, 0, 3, 
+                                      65535, 2, 1, 10, 8 };
 
-            { { 1.f, 0.f, 0.f } },
-            { { 0.f, 0.f, 1.f } },
-            { { 0.f, 0.f, 1.f } },
-            { { 1.f, 0.f, 0.f } },
-            { { 0.f, 0.f, 1.f } },
-            { { 1.f, 0.f, 0.f } },
-            { { 0.f, 0.f, 1.f } },
-            { { 1.f, 0.f, 0.f } }
+        auto v     = new Buffer<  xyzuv > (         GL_ARRAY_BUFFER, 14, 
+                                                   cube, GL_STATIC_DRAW );
 
-        };
+        auto e     = new Buffer< GLuint > ( GL_ELEMENT_ARRAY_BUFFER, 20, 
+                                                  elems, GL_STATIC_DRAW );
 
-        auto elems = new GLuint[14] {0,1,2,3,4,1,5,6,4,7,2,6,0,1};
+        shared_ptr< Buffer<  xyzuv > > sp_v(   v );
+        shared_ptr< Buffer< GLuint > > sp_e(   e );
 
-        auto v     = new Buffer<  vec3<ATTRIB_VERT> > (   GL_ARRAY_BUFFER, 8, 
-                                                        cube, GL_STATIC_DRAW );
+        auto bp_c0 = shared_ptr<BufferPoly>(new BufferPoly( sp_v, sp_e, 20 ) );
 
-        auto c1    = new Buffer< vec3<ATTRIB_COLOR> > (   GL_ARRAY_BUFFER, 8, 
-                                                        col1, GL_STATIC_DRAW );
-
-        auto c2    = new Buffer< vec3<ATTRIB_COLOR> > (   GL_ARRAY_BUFFER, 8, 
-                                                        col2, GL_STATIC_DRAW );
-
-        auto e     = new Buffer< GLuint > (      GL_ELEMENT_ARRAY_BUFFER, 14, 
-                                                       elems, GL_STATIC_DRAW );
-
-        shared_ptr< Buffer<  vec3<ATTRIB_VERT> > > sp_v(   v );
-        shared_ptr< Buffer< vec3<ATTRIB_COLOR> > > sp_c1( c1 );
-        shared_ptr< Buffer< vec3<ATTRIB_COLOR> > > sp_c2( c2 );
-        shared_ptr< Buffer<             GLuint > > sp_e(   e );
-
-        auto bp_c0 = shared_ptr<BufferPoly>(new BufferPoly( sp_v, sp_e, 14 ) );
-        auto bp_c1 = shared_ptr<BufferPoly>(new BufferPoly( sp_v, sp_e, 14 ) );
-        bp_c0->add_array( sp_c1 ); bp_c1->add_array( sp_c2 );
-
-        shared_ptr<Renderable> sp_ic0( new BufferPoly::Instance( bp_c0 ) );
-        shared_ptr<Renderable> sp_ic1( new BufferPoly::Instance( bp_c1 ) );
+        shared_ptr<Renderable> tiger( new BufferPoly::Instance( bp_c0 ) );
 
         delete[] cube; delete[] elems;
 
-        engine.add_child( sp_ic0 );
-        engine.add_child( sp_ic1 );
+        engine.add_child( tiger );
 
-        sp_ic0->transform() = glm::scale( glm::mat4(1.f), glm::vec3(0.5f) );
-        sp_ic1->transform() = glm::scale( glm::mat4(1.f), glm::vec3(0.5f) );
+        tiger->transform() = glm::scale( glm::mat4(1.f), glm::vec3(0.5f) );
 
-        sp_ic0->transform() = glm::translate( sp_ic0->transform(), glm::vec3( -2.f, 0.f, 0.f ) );
-        sp_ic1->transform() = glm::translate( sp_ic1->transform(), glm::vec3(  2.f, 0.f, 0.f ) );
+        tiger->transform() = glm::translate( tiger->transform(), glm::vec3( 0.f,  0.f, 0.f ) );
 
-        sp_ic1->callback()  = sp_ic0->callback() = [](Renderable &r, const double &d) {
+/*        tiger->callback() = [](Renderable &r, const double &d) {
 
             glm::mat4 &mat = r.transform();
 
-            mat = glm::rotate( mat, static_cast<float>(30*d), glm::vec3(1.f, 1.f, 0.f) );
+            mat = glm::rotate( mat, static_cast<float>(30*d), glm::vec3(1.f,1.f,0.f) );
 
-        };
+        };*/
 
         engine.callback() = &engine_callback;
 
+        GLuint texID; glGenTextures( 1, &texID ); glBindTexture( GL_TEXTURE_2D, texID );
+
+        if( glfwLoadTexture2D( "assets/textures/fur.tga", 0 ) ) cout << "Huzzah\n";
+
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glGenerateMipmap( GL_TEXTURE_2D );
         engine.draw_loop();
 
     } catch( char const * msg )
