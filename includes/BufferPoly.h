@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 
 #include "Buffer.h"
+#include "Texture.h"
 #include "Renderable.h"
 #include "ShaderProgram.h"
 
@@ -57,6 +58,32 @@ public:
 
             );
         };
+
+    };
+
+    class TextureInstance : public Instance {
+
+        std::shared_ptr<Texture> _tex;
+
+    public:
+
+        TextureInstance( std::shared_ptr< BufferPoly >  & poly,
+                         std::shared_ptr<    Texture >  &  tex )
+        : Instance( poly ), _tex                     { tex } {};
+
+        TextureInstance( const TextureInstance          & that )
+        : Instance( that ), _tex               { that._tex } {};
+
+        TextureInstance( TextureInstance               && that )
+        : Instance( that )
+        {
+            std::swap( _tex, that._tex );
+        };
+
+        void render( const ShaderProgram &p, const glm::mat4 &m ) const
+        {
+            _tex->bind(); Instance::render( p, m );
+        }
 
     };
 

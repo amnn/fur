@@ -14,6 +14,7 @@
 #include "ShaderProgram.h"
 #include "BufferPoly.h"
 #include "Buffer.h"
+#include "Texture.h"
 #include "GLFWScr.h"
 
 #define FOV_MAX   90.f
@@ -96,12 +97,21 @@ int main( int, char ** )
         auto e     = new Buffer< GLuint > ( GL_ELEMENT_ARRAY_BUFFER, 20, 
                                                   elems, GL_STATIC_DRAW );
 
-        shared_ptr< Buffer<  xyzuv > > sp_v(   v );
-        shared_ptr< Buffer< GLuint > > sp_e(   e );
+        auto t     = new Texture          (               GL_TEXTURE_2D, 
+                                              "assets/textures/fur.tga" );
 
-        auto bp_c0 = shared_ptr<BufferPoly>(new BufferPoly( sp_v, sp_e, 20 ) );
+        t->param( GL_TEXTURE_WRAP_S,                   GL_REPEAT );
+        t->param( GL_TEXTURE_WRAP_T,                   GL_REPEAT );
+        t->param( GL_TEXTURE_MAG_FILTER,               GL_LINEAR );
+        t->param( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 
-        shared_ptr<Renderable> tiger( new BufferPoly::Instance( bp_c0 ) );
+        shared_ptr< Buffer<  xyzuv > > sp_v( v );
+        shared_ptr< Buffer< GLuint > > sp_e( e );
+        shared_ptr<          Texture > sp_t( t );
+
+        auto bp_c0 = shared_ptr<BufferPoly>( new BufferPoly( sp_v, sp_e, 20 ) );
+
+        shared_ptr<Renderable> tiger( new BufferPoly::TextureInstance( bp_c0, sp_t ) );
 
         delete[] cube; delete[] elems;
 
@@ -111,25 +121,16 @@ int main( int, char ** )
 
         tiger->transform() = glm::translate( tiger->transform(), glm::vec3( 0.f,  0.f, 0.f ) );
 
-/*        tiger->callback() = [](Renderable &r, const double &d) {
+        tiger->callback() = [](Renderable &r, const double &d) {
 
             glm::mat4 &mat = r.transform();
 
             mat = glm::rotate( mat, static_cast<float>(30*d), glm::vec3(1.f,1.f,0.f) );
 
-        };*/
+        };
 
         engine.callback() = &engine_callback;
 
-        GLuint texID; glGenTextures( 1, &texID ); glBindTexture( GL_TEXTURE_2D, texID );
-
-        if( glfwLoadTexture2D( "assets/textures/fur.tga", 0 ) ) cout << "Huzzah\n";
-
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-        glGenerateMipmap( GL_TEXTURE_2D );
         engine.draw_loop();
 
     } catch( char const * msg )
